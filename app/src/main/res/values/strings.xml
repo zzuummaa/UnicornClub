@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">UnicornClub</string>
+    <string name="unicorn_club">Клуб любителей единорогов</string>
+    <string name="daily_image_update_time">daily_img_upd_time</string>
+</resources>
