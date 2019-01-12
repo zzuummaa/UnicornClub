@@ -1,6 +1,7 @@
 package ru.zuma.unicornclub
 
 import android.app.Activity
+import android.support.v4.app.Fragment
 import android.widget.Toast
 import kotlinx.coroutines.experimental.CoroutineScope
 import kotlinx.coroutines.experimental.Job
@@ -27,6 +28,10 @@ private val numberFormat = DecimalFormat("###,###", symbols)
 
 fun viewFormat(num: Number?): String? = if (num != null) numberFormat.format(num) else null
 
+fun Fragment.toast(text: CharSequence, duration: Int = Toast.LENGTH_SHORT) {
+    Toast.makeText(activity, text, duration).show()
+}
+
 fun Activity.toast(text: CharSequence, duration: Int = Toast.LENGTH_SHORT) {
     Toast.makeText(this, text, duration).show()
 }
@@ -35,4 +40,12 @@ fun Activity.toastUI(text: CharSequence, duration: Int = Toast.LENGTH_SHORT) {
     runOnUiThread {
         Toast.makeText(this, text, duration).show()
     }
+}
+
+fun Activity.runOnUiThread(context: Activity? = this, action: () -> Unit) {
+    context?.runOnUiThread(action)
+}
+
+fun Fragment.runOnUiThread(context: Activity? = activity, action: () -> Unit) {
+    context?.runOnUiThread(action)
 }

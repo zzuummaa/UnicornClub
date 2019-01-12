@@ -1,70 +1,61 @@
 package ru.zuma.unicornclub
 
-import android.animation.AnimatorInflater
-import android.animation.AnimatorSet
-import android.app.Activity
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
-import android.support.v7.app.AppCompatActivity
+import android.net.Uri
 import android.os.Bundle
-import android.util.Log
-import android.view.animation.AnimationUtils
+import android.support.v4.app.Fragment
+import android.support.v7.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity() {
-    lateinit var sftpManager: SFTPManager
-    var image: Bitmap? = null
+class MainActivity : AppCompatActivity(),
+        NewUnicornFragment.OnFragmentInteractionListener,
+        CollectionFragment.OnFragmentInteractionListener,
+        AboutAuthorFragment.OnFragmentInteractionListener {
+
+    private lateinit var newUnicornFragment: NewUnicornFragment
+    private lateinit var collectionFragment: CollectionFragment
+    private lateinit var aboutAuthorFragment: AboutAuthorFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         title = getString(R.string.unicorn_club)
 
-        sftpManager = SFTPManager()
-        loadImage()
+        newUnicornFragment = NewUnicornFragment()
+        collectionFragment = CollectionFragment()
+        aboutAuthorFragment = AboutAuthorFragment()
+        setContent(newUnicornFragment)
 
-        btAnimation.setOnClickListener {
-            val bitmap = image
-            if (bitmap == null) {
-                loadImage()
-            } else {
-                updateDailyImage(bitmap)
+        bottomNavigation.setOnNavigationItemSelectedListener {
+            when (it.itemId) {
+                R.id.new_unicorn -> setContent(newUnicornFragment)
+                R.id.collection  -> setContent(collectionFragment)
+                R.id.about_author-> setContent(aboutAuthorFragment)
             }
+            return@setOnNavigationItemSelectedListener true
         }
     }
 
-    private fun loadImage() {
-        val timeOfDailyImageUpdate = loadTimeOfDailyImageUpdate(this)
-        sftpManager.loadDailyImageIfUpdated(timeOfDailyImageUpdate, onImage = { img, time ->
-            Log.d(this@MainActivity.javaClass.simpleName, "Daily image loaded from SFTP")
-            storeTimeOfDailyImageUpdate(this@MainActivity, time)
-            storeDailyImage(this@MainActivity, img)
-            image = img
-            runOnUiThread {
-                updateDailyImage(img)
-            }
-        }, onNothingUpdate = {
-            val bitmap = loadDailyImage(this@MainActivity)
-            image = bitmap
-            runOnUiThread {
-                if (bitmap != null) {
-                    Log.d(this@MainActivity.javaClass.simpleName, "Daily image loaded from file system")
-                    updateDailyImage(bitmap)
-                } else {
-                    Log.e(this@MainActivity.javaClass.simpleName, "Daily image not loaded")
-                    toast("Похоже на сервер забыли положить единорожка:(")
-                }
-            }
-        })
+    private fun setContent(contentFragment: Fragment?) {
+        // Create new fragment and transaction
+        val transaction = supportFragmentManager.beginTransaction()
+
+        // Replace whatever is in the fragment_container view with this fragment,
+        // and add the transaction to the back stack
+        transaction.replace(R.id.frContent, contentFragment)
+
+        // Commit the transaction
+        transaction.commit()
     }
 
-    private fun updateDailyImage(img: Bitmap) {
-        ivDailyImage.setImageBitmap(img)
-        val animation = AnimationUtils.loadAnimation(this@MainActivity, R.anim.daily_image_appear)
-        ivDailyImage.startAnimation(animation)
+    override fun onNewUnicornFragmentInteraction(uri: Uri) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    private fun runOnUiThread(context: Activity? = this@MainActivity, action: () -> Unit) {
-        context?.runOnUiThread(action)
+    override fun onCollectionFragmentInteraction(uri: Uri) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onAboutAuthorFragmentInteraction(uri: Uri) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/new_unicorn"
+        android:title="Новый единорог"
+        android:icon="@drawable/ic_daily_unicorn_24dp" />
+    <item android:id="@+id/collection"
+        android:title="Коллекция"
+        android:icon="@drawable/ic_collection_24dp" />
+    <item android:id="@+id/about_author"
+        android:title="Об авторе"
+        android:icon="@drawable/ic_author_24dp" />
+</menu>
