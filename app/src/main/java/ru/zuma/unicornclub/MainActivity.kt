@@ -7,11 +7,11 @@ import android.support.v7.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(),
-        NewUnicornFragment.OnFragmentInteractionListener,
+        DailyUnicornFragment.OnFragmentInteractionListener,
         CollectionFragment.OnFragmentInteractionListener,
         AboutAuthorFragment.OnFragmentInteractionListener {
 
-    private lateinit var newUnicornFragment: NewUnicornFragment
+    private lateinit var dailyUnicornFragment: DailyUnicornFragment
     private lateinit var collectionFragment: CollectionFragment
     private lateinit var aboutAuthorFragment: AboutAuthorFragment
 
@@ -20,14 +20,14 @@ class MainActivity : AppCompatActivity(),
         setContentView(R.layout.activity_main)
         title = getString(R.string.unicorn_club)
 
-        newUnicornFragment = NewUnicornFragment()
+        dailyUnicornFragment = DailyUnicornFragment()
         collectionFragment = CollectionFragment()
         aboutAuthorFragment = AboutAuthorFragment()
-        setContent(newUnicornFragment)
+        setContent(dailyUnicornFragment)
 
         bottomNavigation.setOnNavigationItemSelectedListener {
             when (it.itemId) {
-                R.id.new_unicorn -> setContent(newUnicornFragment)
+                R.id.new_unicorn -> setContent(dailyUnicornFragment)
                 R.id.collection  -> setContent(collectionFragment)
                 R.id.about_author-> setContent(aboutAuthorFragment)
             }

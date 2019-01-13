@@ -2,6 +2,8 @@ package ru.zuma.unicornclub
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -12,6 +14,8 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.ImageView
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.launch
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -22,23 +26,17 @@ private const val ARG_PARAM2 = "param2"
 /**
  * A simple [Fragment] subclass.
  * Activities that contain this fragment must implement the
- * [NewUnicornFragment.OnFragmentInteractionListener] interface
+ * [DailyUnicornFragment.OnFragmentInteractionListener] interface
  * to handle interaction events.
- * Use the [NewUnicornFragment.newInstance] factory method to
+ * Use the [DailyUnicornFragment.newInstance] factory method to
  * create an instance of this fragment.
  *
  */
-class NewUnicornFragment : Fragment() {
+class DailyUnicornFragment : Fragment() {
     private var listener: OnFragmentInteractionListener? = null
 
-    private lateinit var sftpManager: SFTPManager
     private var image: Bitmap? = null
     private lateinit var ivDailyImage: ImageView
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        sftpManager = SFTPManager()
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -46,9 +44,7 @@ class NewUnicornFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_new_unicorn, container, false)
 
         ivDailyImage = view.findViewById(R.id.ivDailyImage)
-        loadImage()
-
-        view.findViewById<Button>(R.id.btAnimation).setOnClickListener {
+        ivDailyImage.setOnClickListener {
             val bitmap = image
             if (bitmap == null) {
                 loadImage()
@@ -56,6 +52,7 @@ class NewUnicornFragment : Fragment() {
                 updateDailyImage(bitmap)
             }
         }
+        loadImage()
 
         return view
     }
@@ -80,28 +77,28 @@ class NewUnicornFragment : Fragment() {
     }
 
     private fun loadImage() {
-        val timeOfDailyImageUpdate = loadTimeOfDailyImageUpdate(activity)
-        sftpManager.loadDailyImageIfUpdated(timeOfDailyImageUpdate, onImage = { img, time ->
-            Log.d(this@NewUnicornFragment.javaClass.simpleName, "Daily image loaded from SFTP")
-            storeTimeOfDailyImageUpdate(activity, time)
-            storeDailyImage(activity, img)
-            image = img
-            runOnUiThread {
-                updateDailyImage(img)
+        launchPrintThrowable {
+            val responseBody = Backend.api.getDailyUnicornImage().unwrapCall()
+
+            if (responseBody == null) {
+                Log.e(javaClass.simpleName, "Response body is null")
+                toast("Ошибка загрузки изображения")
+                return@launchPrintThrowable
             }
-        }, onNothingUpdate = {
-            val bitmap = loadDailyImage(activity)
-            image = bitmap
-            runOnUiThread {
-                if (bitmap != null) {
-                    Log.d(this@NewUnicornFragment.javaClass.simpleName, "Daily image loaded from file system")
-                    updateDailyImage(bitmap)
-                } else {
-                    Log.e(this@NewUnicornFragment.javaClass.simpleName, "Daily image not loaded")
-                    toast("Похоже на сервер забыли положить единорожка:(")
+
+            if (responseBody.contentType()?.type() == "image") {
+                val bytes = responseBody.bytes()
+                val img = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                image = img
+                runOnUiThread {
+                    updateDailyImage(img)
                 }
+            } else {
+                Log.e(javaClass.simpleName, "Invalid content type. Required 'image'")
+                toast("Сервер вернул не изображение")
             }
-        })
+        }
+
     }
 
     private fun updateDailyImage(img: Bitmap) {
@@ -133,12 +130,12 @@ class NewUnicornFragment : Fragment() {
          *
          * @param param1 Parameter 1.
          * @param param2 Parameter 2.
-         * @return A new instance of fragment NewUnicornFragment.
+         * @return A new instance of fragment DailyUnicornFragment.
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
-                NewUnicornFragment().apply {
+                DailyUnicornFragment().apply {
                     arguments = Bundle().apply {
                         putString(ARG_PARAM1, param1)
                         putString(ARG_PARAM2, param2)
