@@ -82,7 +82,7 @@ class DailyUnicornFragment : Fragment() {
 
             if (responseBody == null) {
                 Log.e(javaClass.simpleName, "Response body is null")
-                toast("Ошибка загрузки изображения")
+                toastUI("Ошибка загрузки изображения")
                 return@launchPrintThrowable
             }
 
@@ -95,7 +95,7 @@ class DailyUnicornFragment : Fragment() {
                 }
             } else {
                 Log.e(javaClass.simpleName, "Invalid content type. Required 'image'")
-                toast("Сервер вернул не изображение")
+                toastUI("Сервер вернул не изображение")
             }
         }
 

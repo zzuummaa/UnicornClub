@@ -20,6 +20,8 @@ interface BackendApi {
 }
 
 object Backend {
+    val urlBase = "http://zzuummaa.sytes.net:8070/"
+    val urlUnicornImagesBase = urlBase + "fileserver/unicorn/images/"
     var api: BackendApi
 
     init {
@@ -30,13 +32,15 @@ object Backend {
                 .build()
 
         val retrofit = Retrofit.Builder()
-                .baseUrl("http://zzuummaa.sytes.net:8070/")
+                .baseUrl(urlBase)
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(client)
                 .build()
 
         api = retrofit.create(BackendApi::class.java)
     }
+
+    fun imageURL(photo: UnicornImage) = urlUnicornImagesBase + String.format("%02d%02d", photo.month, photo.dayOfMonth) + ".jpg"
 }
 
 fun <T> Call<T>.unwrapCall(): T? {

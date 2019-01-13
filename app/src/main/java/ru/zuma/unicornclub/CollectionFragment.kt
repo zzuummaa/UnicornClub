@@ -2,11 +2,17 @@ package ru.zuma.unicornclub
 
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.support.annotation.RequiresApi
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.GridLayoutManager
+import java.time.LocalDate
+import java.time.Month
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -26,15 +32,29 @@ private const val ARG_PARAM2 = "param2"
 class CollectionFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var listener: OnFragmentInteractionListener? = null
+    private var unicornImages = ArrayList<UnicornImage>()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_collection, container, false)
+        val view = inflater.inflate(R.layout.fragment_collection, container, false)
+
+        val layoutManager = GridLayoutManager(activity, 2)
+        val recyclerView = view.findViewById<RecyclerView>(R.id.rvImages)
+        recyclerView.setHasFixedSize(true)
+        recyclerView.layoutManager = layoutManager
+
+        var date = LocalDate.of(1970, Month.JANUARY, 1)
+        do {
+            unicornImages.add(UnicornImage(date.monthValue, date.dayOfMonth, false))
+            date = date.plusDays(1)
+        } while (date.month != Month.JANUARY || date.dayOfMonth != 1)
+
+        val adapter = ImageGalleryAdapter(activity!!, unicornImages)
+        recyclerView.adapter = adapter
+
+        return view
     }
 
     // TODO: Rename method, update argument and hook method into UI event

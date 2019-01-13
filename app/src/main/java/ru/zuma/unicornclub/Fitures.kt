@@ -32,6 +32,12 @@ fun Fragment.toast(text: CharSequence, duration: Int = Toast.LENGTH_SHORT) {
     Toast.makeText(activity, text, duration).show()
 }
 
+fun Fragment.toastUI(text: CharSequence, duration: Int = Toast.LENGTH_SHORT) {
+    runOnUiThread {
+        Toast.makeText(activity, text, duration).show()
+    }
+}
+
 fun Activity.toast(text: CharSequence, duration: Int = Toast.LENGTH_SHORT) {
     Toast.makeText(this, text, duration).show()
 }
