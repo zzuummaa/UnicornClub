@@ -9,11 +9,12 @@ import kotlinx.coroutines.experimental.launch
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 
-fun launchPrintThrowable(runnable: suspend CoroutineScope.() -> Unit): Job {
+fun launchPrintThrowable(handler: (Throwable) -> Unit = {}, runnable: suspend CoroutineScope.() -> Unit): Job {
     return launch {
         try {
             runnable()
         } catch (e: Throwable) {
+            handler.invoke(e)
             e.printStackTrace()
         }
     }

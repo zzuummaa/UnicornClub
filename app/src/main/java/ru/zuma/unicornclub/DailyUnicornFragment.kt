@@ -2,20 +2,24 @@ package ru.zuma.unicornclub
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.graphics.Palette
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.Button
 import android.widget.ImageView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target;
+import kotlinx.android.synthetic.main.activity_space_photo.*
 import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.runBlocking
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -38,6 +42,9 @@ class DailyUnicornFragment : Fragment() {
     private var image: Bitmap? = null
     private lateinit var ivDailyImage: ImageView
 
+    private var isLoadWorking = false
+    private var isUnicornInCollection = false
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
@@ -49,7 +56,7 @@ class DailyUnicornFragment : Fragment() {
             if (bitmap == null) {
                 loadImage()
             } else {
-                updateDailyImage(bitmap)
+                updateDailyImageView(bitmap)
             }
         }
         loadImage()
@@ -77,31 +84,62 @@ class DailyUnicornFragment : Fragment() {
     }
 
     private fun loadImage() {
-        launchPrintThrowable {
-            val responseBody = Backend.api.getDailyUnicornImage().unwrapCall()
+        if (isLoadWorking) return
 
-            if (responseBody == null) {
-                Log.e(javaClass.simpleName, "Response body is null")
+        launchPrintThrowable({ isLoadWorking = false }) {
+
+            val dailyUnicorn = Backend.auth.waitAuthBefore {
+                Backend.api.getDailyUnicorn().unwrapCall()
+            }
+
+            if (dailyUnicorn?.url == null) {
+                Log.e(javaClass.simpleName, "Response field or body is null")
                 toastUI("Ошибка загрузки изображения")
+                isLoadWorking = false
                 return@launchPrintThrowable
             }
 
-            if (responseBody.contentType()?.type() == "image") {
-                val bytes = responseBody.bytes()
-                val img = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                image = img
-                runOnUiThread {
-                    updateDailyImage(img)
+            if (!isUnicornInCollection) {
+                async {
+                    Backend.api.saveDailyUnicornToCollection().unwrapCall()?.let {
+                        isUnicornInCollection = true
+                    }
                 }
-            } else {
-                Log.e(javaClass.simpleName, "Invalid content type. Required 'image'")
-                toastUI("Сервер вернул не изображение")
+            }
+
+            runOnUiThread {
+                Glide.with(activity!!)
+                        .load(dailyUnicorn.url)
+                        .asBitmap()
+                        .animate(R.anim.daily_image_appear)
+                        .listener(object : RequestListener<String, Bitmap> {
+
+                            override fun onException(e: Exception, model: String, target: Target<Bitmap>, isFirstResource: Boolean): Boolean {
+                                isLoadWorking = false
+                                return false
+                            }
+
+                            override fun onResourceReady(resource: Bitmap, model: String, target: Target<Bitmap>, isFromMemoryCache: Boolean, isFirstResource: Boolean): Boolean {
+                                updateDailyImageView(resource)
+                                image = resource
+                                isLoadWorking = false
+                                return true
+                            }
+
+                            fun onPalette(palette: Palette?) {
+                                if (null != palette) {
+                                    val parent = imageView.getParent().getParent() as ViewGroup
+                                    parent.setBackgroundColor(palette!!.getDarkVibrantColor(Color.GRAY))
+                                }
+                            }
+                        })
+                        .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                        .into(ivDailyImage)
             }
         }
-
     }
 
-    private fun updateDailyImage(img: Bitmap) {
+    private fun updateDailyImageView(img: Bitmap) {
         ivDailyImage.setImageBitmap(img)
         val animation = AnimationUtils.loadAnimation(activity, R.anim.daily_image_appear)
         ivDailyImage.startAnimation(animation)

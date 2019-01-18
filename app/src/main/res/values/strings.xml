@@ -2,6 +2,7 @@
     <string name="app_name">UnicornClub</string>
     <string name="unicorn_club">Клуб любителей единорогов</string>
     <string name="daily_image_update_time">daily_img_upd_time</string>
+    <string name="auth_token">auth_token</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

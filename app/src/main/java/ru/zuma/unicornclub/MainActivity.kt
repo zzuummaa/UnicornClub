@@ -1,10 +1,14 @@
 package ru.zuma.unicornclub
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import kotlinx.android.synthetic.main.activity_main.*
+import ru.zuma.unicornclub.model.User
 
 class MainActivity : AppCompatActivity(),
         DailyUnicornFragment.OnFragmentInteractionListener,
@@ -20,6 +24,10 @@ class MainActivity : AppCompatActivity(),
         setContentView(R.layout.activity_main)
         title = getString(R.string.unicorn_club)
 
+        launchPrintThrowable {
+            initAuthToken()
+        }
+
         dailyUnicornFragment = DailyUnicornFragment()
         collectionFragment = CollectionFragment()
         aboutAuthorFragment = AboutAuthorFragment()
@@ -32,6 +40,22 @@ class MainActivity : AppCompatActivity(),
                 R.id.about_author-> setContent(aboutAuthorFragment)
             }
             return@setOnNavigationItemSelectedListener true
+        }
+    }
+
+    @SuppressLint("HardwareIds")
+    private fun initAuthToken() {
+        val token = Storage.loadAuthToken(this)
+        if (token != null) {
+            Backend.auth.token = token
+            return
+        }
+
+        val androidId = Settings.Secure.getString(
+                contentResolver,Settings.Secure.ANDROID_ID)
+
+        Backend.authByAndroidId(androidId)?.let {
+            Storage.storeAuthToken(this, it)
         }
     }
 
