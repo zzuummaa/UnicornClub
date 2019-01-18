@@ -3,27 +3,17 @@ package ru.zuma.unicornclub
 import android.os.Parcel
 import android.os.Parcelable
 
-class UnicornImage : Parcelable {
-
-    var month: Int = 0
-    var dayOfMonth: Int = 0
+data class UnicornImage (
+    var month: Int = 0,
+    var dayOfMonth: Int = 0,
     var isKnown: Boolean = false
+) : Parcelable {
 
-
-
-    constructor(month: Int, dayOfMonth: Int, isKnown: Boolean) {
-        this.month = month
-        this.dayOfMonth = dayOfMonth
-        this.isKnown = isKnown
-    }
-
-    protected constructor(`in`: Parcel) {
+    protected constructor(`in`: Parcel) : this() {
         dayOfMonth = `in`.readInt()
         month = `in`.readInt()
         isKnown = `in`.readInt() == 1
     }
-
-    constructor()
 
     override fun describeContents(): Int {
         return 0

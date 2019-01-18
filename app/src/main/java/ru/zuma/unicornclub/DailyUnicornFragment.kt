@@ -109,32 +109,28 @@ class DailyUnicornFragment : Fragment() {
 
             runOnUiThread {
                 Glide.with(activity!!)
-                        .load(dailyUnicorn.url)
-                        .asBitmap()
-                        .animate(R.anim.daily_image_appear)
-                        .listener(object : RequestListener<String, Bitmap> {
+                    .load(dailyUnicorn.url)
+                    .asBitmap()
+                    .animate(R.anim.daily_image_appear)
+                    .listener(object : RequestListener<String, Bitmap> {
+                        override fun onException(e: Exception, model: String, target: Target<Bitmap>, isFirstResource: Boolean): Boolean {
+                            isLoadWorking = false
 
-                            override fun onException(e: Exception, model: String, target: Target<Bitmap>, isFirstResource: Boolean): Boolean {
-                                isLoadWorking = false
-                                return false
-                            }
+                            Log.e(this@DailyUnicornFragment.javaClass.simpleName, "Load failed", e)
+                            return false
+                        }
 
-                            override fun onResourceReady(resource: Bitmap, model: String, target: Target<Bitmap>, isFromMemoryCache: Boolean, isFirstResource: Boolean): Boolean {
-                                updateDailyImageView(resource)
-                                image = resource
-                                isLoadWorking = false
-                                return true
-                            }
-
-                            fun onPalette(palette: Palette?) {
-                                if (null != palette) {
-                                    val parent = imageView.getParent().getParent() as ViewGroup
-                                    parent.setBackgroundColor(palette!!.getDarkVibrantColor(Color.GRAY))
-                                }
-                            }
-                        })
-                        .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                        .into(ivDailyImage)
+                        override fun onResourceReady(resource: Bitmap, model: String, target: Target<Bitmap>, isFromMemoryCache: Boolean, isFirstResource: Boolean): Boolean {
+                            updateDailyImageView(resource)
+                            image = resource
+                            isLoadWorking = false
+                            Log.d(this@DailyUnicornFragment.javaClass.simpleName,
+                                    "Image " + dailyUnicorn.url + " loaded")
+                            return true
+                        }
+                    })
+                    .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                    .into(ivDailyImage)
             }
         }
     }
