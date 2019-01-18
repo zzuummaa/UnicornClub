@@ -11,8 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.GridLayoutManager
-import java.time.LocalDate
-import java.time.Month
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -33,8 +31,8 @@ class CollectionFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var listener: OnFragmentInteractionListener? = null
     private var unicornImages = ArrayList<UnicornImage>()
+    private lateinit var unicornsAdapter: ImageGalleryAdapter
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
@@ -45,21 +43,46 @@ class CollectionFragment : Fragment() {
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager = layoutManager
 
-        var date = LocalDate.of(1970, Month.JANUARY, 1)
-        do {
-            unicornImages.add(UnicornImage(date.monthValue, date.dayOfMonth, false))
-            date = date.plusDays(1)
-        } while (date.month != Month.JANUARY || date.dayOfMonth != 1)
+//        launchPrintThrowable {
+//            loadCollection()
+//        }
 
-        val adapter = ImageGalleryAdapter(activity!!, unicornImages)
-        recyclerView.adapter = adapter
+        unicornsAdapter = ImageGalleryAdapter(activity!!, unicornImages)
+        recyclerView.adapter = unicornsAdapter
 
         return view
+    }
+
+    private suspend fun loadCollection() {
+        val unicorns = Backend.auth.waitAuthBefore {
+            Backend.api.getUnicornCollection().unwrapCall()
+        } ?: return
+
+        unicornImages.clear()
+        unicorns.forEach {
+            val date = it.date ?: return
+
+            unicornImages.add(UnicornImage(
+                date.substring(0, 2).toInt(),
+                date.substring(2, 4).toInt(),
+                true
+            ))
+        }
+
+        runOnUiThread {
+            unicornsAdapter.notifyDataSetChanged()
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event
     fun onButtonPressed(uri: Uri) {
         listener?.onCollectionFragmentInteraction(uri)
+    }
+
+    fun doLoadCollection() {
+        launchPrintThrowable {
+            loadCollection()
+        }
     }
 
     override fun onAttach(context: Context) {

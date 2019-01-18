@@ -5,9 +5,11 @@ import android.os.Parcelable
 
 class UnicornImage : Parcelable {
 
-    var month: Int
-    var dayOfMonth: Int
-    var isKnown: Boolean
+    var month: Int = 0
+    var dayOfMonth: Int = 0
+    var isKnown: Boolean = false
+
+
 
     constructor(month: Int, dayOfMonth: Int, isKnown: Boolean) {
         this.month = month
@@ -20,6 +22,8 @@ class UnicornImage : Parcelable {
         month = `in`.readInt()
         isKnown = `in`.readInt() == 1
     }
+
+    constructor()
 
     override fun describeContents(): Int {
         return 0

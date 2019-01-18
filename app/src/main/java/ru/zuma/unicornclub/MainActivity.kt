@@ -6,9 +6,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import kotlinx.android.synthetic.main.activity_main.*
-import ru.zuma.unicornclub.model.User
 
 class MainActivity : AppCompatActivity(),
         DailyUnicornFragment.OnFragmentInteractionListener,
@@ -35,8 +33,8 @@ class MainActivity : AppCompatActivity(),
 
         bottomNavigation.setOnNavigationItemSelectedListener {
             when (it.itemId) {
-                R.id.new_unicorn -> setContent(dailyUnicornFragment)
-                R.id.collection  -> setContent(collectionFragment)
+                R.id.new_unicorn -> { setContent(dailyUnicornFragment) }
+                R.id.collection  -> { setContent(collectionFragment); collectionFragment.doLoadCollection() }
                 R.id.about_author-> setContent(aboutAuthorFragment)
             }
             return@setOnNavigationItemSelectedListener true

@@ -65,7 +65,7 @@ class DailyUnicornFragment : Fragment() {
     }
 
     // TODO: Rename method, update argument and hook method into UI event
-    fun onButtonPressed(uri: Uri) {
+    fun onShow(uri: Uri) {
         listener?.onNewUnicornFragmentInteraction(uri)
     }
 
@@ -83,7 +83,7 @@ class DailyUnicornFragment : Fragment() {
         listener = null
     }
 
-    private fun loadImage() {
+    fun loadImage() {
         if (isLoadWorking) return
 
         launchPrintThrowable({ isLoadWorking = false }) {

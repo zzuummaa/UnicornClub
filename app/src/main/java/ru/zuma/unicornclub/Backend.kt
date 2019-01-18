@@ -1,9 +1,7 @@
 package ru.zuma.unicornclub
 
 import android.util.Log
-import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.sync.Mutex
-import kotlinx.coroutines.experimental.sync.withLock
 import okhttp3.*
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -12,8 +10,7 @@ import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
-import retrofit2.http.Path
-import ru.zuma.unicornclub.model.DailyUnicorn
+import ru.zuma.unicornclub.model.Unicorn
 import ru.zuma.unicornclub.model.StatusResponse
 import ru.zuma.unicornclub.model.User
 import java.lang.IndexOutOfBoundsException
@@ -21,10 +18,13 @@ import java.lang.IndexOutOfBoundsException
 
 interface BackendApi {
     @GET("unicorn/daily")
-    fun getDailyUnicorn(): Call<DailyUnicorn>
+    fun getDailyUnicorn(): Call<Unicorn>
 
     @POST("unicorn/collection")
     fun saveDailyUnicornToCollection(): Call<ResponseBody>
+
+    @GET("unicorn/collection")
+    fun getUnicornCollection(): Call<List<Unicorn>>
 
     @POST("unicorn/auth/register")
     fun register(@Body user: User): Call<StatusResponse>

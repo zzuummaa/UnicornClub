@@ -1,6 +1,6 @@
 package ru.zuma.unicornclub.model
 
-class DailyUnicorn (
+class Unicorn (
     var date: String? = null,
     var url: String? = null
 )
