@@ -10,25 +10,17 @@ import android.view.MotionEvent;
 
 public class DetectSwipeGestureListener extends GestureDetector.SimpleOnGestureListener {
 
-    private DisplayMetrics displayMetrics;
-
     // Minimal x and y axis swipe distance in CM.
-    private float minHorizontalSwipeDist;
-    private float MIN_SWIPE_DISTANCE_Y;
+    private float minHorizontalSwipeDist = 0.8f;
 
     // Maximal x and y axis swipe distance in CM.
-    private float MAX_SWIPE_DISTANCE_X;
-    private float minVerticalSwipeDist;
+    private float minVerticalSwipeDist = 1.2f;
 
     // Source activity that display message in text view.
     private UnicornImageActivity activity = null;
 
     public DetectSwipeGestureListener(UnicornImageActivity activity) {
         this.activity = activity;
-        this.displayMetrics = activity.getResources().getDisplayMetrics();
-
-        minHorizontalSwipeDist = displayMetrics.widthPixels * 0.2f;
-        minVerticalSwipeDist = displayMetrics.heightPixels * 0.3f;
     }
 
     /* This method is invoked when a swipe gesture happened. */
@@ -41,9 +33,11 @@ public class DetectSwipeGestureListener extends GestureDetector.SimpleOnGestureL
         // Get swipe delta value in y axis.
         float deltaY = e1.getY() - e2.getY();
 
+        DisplayMetrics displayMetrics = activity.getResources().getDisplayMetrics();
+
         // Get absolute value.
-        float deltaXAbs = Math.abs(deltaX);
-        float deltaYAbs = Math.abs(deltaY);
+        float deltaXAbs = Math.abs(deltaX) / displayMetrics.xdpi * 2.54f;
+        float deltaYAbs = Math.abs(deltaY) / displayMetrics.ydpi * 2.54f;
 
         if (deltaXAbs >= minHorizontalSwipeDist) {
             if (deltaX > 0) {
