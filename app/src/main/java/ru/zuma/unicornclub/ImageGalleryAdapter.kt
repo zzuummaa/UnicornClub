@@ -1,7 +1,6 @@
 package ru.zuma.unicornclub
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.support.v4.content.ContextCompat.startActivity
@@ -18,7 +17,6 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import kotlinx.coroutines.experimental.Job
 import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.PriorityBlockingQueue
 
 class ImageGalleryAdapter(private val mContext: Activity,
                           private val mUnicornImages: ArrayList<UnicornImage>) : RecyclerView.Adapter<ImageGalleryAdapter.MyViewHolder>() {
@@ -104,16 +102,19 @@ class ImageGalleryAdapter(private val mContext: Activity,
             itemView.setOnClickListener(this)
         }
 
-        override fun onClick(view: View) {
+        private var onClickTime: Long = 0
+        private var onClickTimeout: Long = 1000
 
+        override fun onClick(view: View) {
             val position = adapterPosition
-            if (position != RecyclerView.NO_POSITION) {
-                val spacePhoto = mUnicornImages[position]
+            if (position != RecyclerView.NO_POSITION && System.currentTimeMillis() > onClickTime) {
+                onClickTime = System.currentTimeMillis() + onClickTimeout
 
                 if (mPhotoImageView.drawable == grayRect) return
 
                 val intent = Intent(mContext, UnicornImageActivity::class.java)
-                intent.putExtra(UnicornImageActivity.EXTRA_SPACE_PHOTO, spacePhoto)
+                intent.putExtra(UnicornImageActivity.CURRENT_UNICORN_POS, position)
+                intent.putParcelableArrayListExtra(UnicornImageActivity.UNICORN_IMAGES_LIST, mUnicornImages)
                 startActivity(mContext, intent, null)
             }
         }
